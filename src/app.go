@@ -90,7 +90,7 @@ func (a *App) handleStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) authorized(r *http.Request) bool {
- if a.cfg.[REDACTED] "" {
+if a.cfg.[REDACTED] "" {
  return true
  }
 
