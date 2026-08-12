@@ -5,6 +5,7 @@ import (
  "fmt"
  "log"
  "net/http"
+ "net/url"
  "sort"
  "strconv"
  "strings"
@@ -169,7 +170,7 @@ func (a *App) writeTorznabResults(
  items:= make([]torznabItem, 0, len(selected))
 
  for _, result:= range selected {
- items = append(items, a.resultToTorznabItem(result))
+ items = append(items, a.resultToTorznabItem(r, result))
  }
    feed:= torznabRSS{
  Version: "2.0",
@@ -193,18 +194,29 @@ func (a *App) writeTorznabResults(
  _, _ = w.Write(data)
 }
 
-func (a *App) resultToTorznabItem(result SearchResult) torznabItem {
+func (a *App) resultToTorznabItem(
+ r *http.Request,
+ result SearchResult,
+) torznabItem {
  guid:= strings.TrimSpace(result.GUID)
  if guid == "" {
  guid = result.TrackerID + ":" + result.DetailsURL
  }
 
- link:= strings.TrimSpace(result.TorrentURL)
- if link == "" {
- link = strings.TrimSpace(result.MagnetURL)
+ link:= strings.TrimSpace(result.DetailsURL)
+ prefix:= result.TrackerID + ":"
+
+ if strings.HasPrefix(guid, prefix) {
+ id:= strings.TrimPrefix(guid, prefix)
+ if id!= "" {
+ link = requestBaseURL(r) +
+ "/download/" + url.PathEscape(result.TrackerID) +
+ "/" + url.PathEscape(id)
+
+ if a.cfg.APIKey!= "" {
+ link += "?[REDACTED] + url.QueryEscape(a.cfg.APIKey)
  }
- if link == "" {
- link = strings.TrimSpace(result.DetailsURL)
+ }
  }
 
  categories:= result.Categories
@@ -213,15 +225,45 @@ func (a *App) resultToTorznabItem(result SearchResult) torznabItem {
  }
 
  attrs:= []torznabAttr{
- {Name: "seeders", Value: strconv.Itoa(result.Seeders)},
- {Name: "peers", Value: strconv.Itoa(result.Seeders + result.Leechers)},
- {Name: "size", Value: strconv.FormatInt(result.Size, 10)},
  {Name: "tracker", Value: result.TrackerID},
+ }
+
+ if result.Seeders >= 0 {
+ attrs = append(attrs, torznabAttr{
+ Name: "seeders",
+ Value: strconv.Itoa(result.Seeders),
+ })
+ }
+
+ if result.Seeders >= 0 || result.Leechers >= 0 {
+ seeders:= result.Seeders
+ leechers:= result.Leechers
+ if seeders < 0 {
+ seeders = 0
+ }
+ if leechers < 0 {
+ leechers = 0
+ }
+
+ attrs = append(attrs, torznabAttr{
+ Name: "peers",
+ Value: strconv.Itoa(seeders + leechers),
+ })
+ }
+
+ if result.Size > 0 {
+ attrs = append(attrs, torznabAttr{
+ Name: "size",
+ Value: strconv.FormatInt(result.Size, 10),
+ })
  }
 
  item:= torznabItem{
  Title: result.Title,
- GUID: torznabGUID{IsPermaLink: "false", Value: guid},
+ GUID: torznabGUID{
+ IsPermaLink: "false",
+ Value: guid,
+ },
  Link: link,
  Comments: result.DetailsURL,
  Size: result.Size,
@@ -233,9 +275,9 @@ func (a *App) resultToTorznabItem(result SearchResult) torznabItem {
  item.PubDate = result.PublishDate.UTC().Format(time.RFC1123Z)
  }
 
- if result.TorrentURL!= "" {
+ if link!= "" && result.Size > 0 {
  item.Enclosure = &torznabEnclosure{
- URL: result.TorrentURL,
+ URL: link,
  Length: result.Size,
  Type: "application/x-bittorrent",
  }
