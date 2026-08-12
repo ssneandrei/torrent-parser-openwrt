@@ -37,18 +37,21 @@ func loadConfig() (Config, error) {
 
  cfg.Enabled = uciBool("torrent-parser.main.enabled", true)
 
- if v:= uciGet("torrent-parser.main.listen"); v!= "" {
- cfg.Listen = v
- }
-
- if v:= uciGet("torrent-parser.main.listen"); v!= "" {
+if v:= uciGet("torrent-parser.main.listen"); v!= "" {
  cfg.Listen = v
 }
 
 cfg.[REDACTED] v:= uciGet("torrent-parser.main.timeout"); v!= "" {
+ if n, err:= strconv.Atoi(v); err == nil && n > 0 {
+ cfg.Timeout = time.Duration(n) * time.Second
+ }
+}
 
- cfg.Proxy = uciGet("torrent-parser.main.proxy")
+if v:= uciGet("torrent-parser.main.user_agent"); v!= "" {
+ cfg.UserAgent = v
+}
 
+cfg.Proxy = uciGet("torrent-parser.main.proxy")
  cfg.Trackers["rutracker"] = loadTracker(
  "rutracker",
  "https://rutracker.org",
