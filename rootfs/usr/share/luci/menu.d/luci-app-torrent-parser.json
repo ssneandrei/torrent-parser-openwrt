@@ -1,0 +1,14 @@
+{
+ "admin/services/torrent-parser": {
+ "title": "Torrent Parser",
+ "order": 90,
+ "action": {
+ "type": "view",
+ "path": "torrent-parser/main"
+ },
+ "depends": {
+ "acl": [ "luci-app-torrent-parser" ],
+ "uci": { "torrent-parser": true }
+ }
+ }
+}
