@@ -1,0 +1,18 @@
+{
+ "luci-app-torrent-parser": {
+ "description": "Grant access to Torrent Parser settings and service controls",
+ "read": {
+ "uci": [ "torrent-parser" ],
+ "file": {
+ "/etc/init.d/torrent-parser": [ "exec" ],
+ "/usr/bin/torrent-parser": [ "exec" ]
+ },
+ "ubus": {
+ "service": [ "list" ]
+ }
+ },
+ "write": {
+ "uci": [ "torrent-parser" ]
+ }
+ }
+}
