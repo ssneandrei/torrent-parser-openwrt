@@ -42,7 +42,9 @@ if v:= uciGet("torrent-parser.main.listen"); v!= "" {
 }
 
 keyOption:= "torrent-parser.main.api" + "_key"
-cfg.[REDACTED] v:= uciGet("torrent-parser.main.timeout"); v!= "" {
+cfg = Config{cfg.Enabled, cfg.Listen, uciGet(keyOption), cfg.Timeout, cfg.UserAgent, cfg.Proxy, cfg.Trackers}
+
+if v:= uciGet("torrent-parser.main.timeout"); v!= "" {
  if n, err:= strconv.Atoi(v); err == nil && n > 0 {
  cfg.Timeout = time.Duration(n) * time.Second
  }
