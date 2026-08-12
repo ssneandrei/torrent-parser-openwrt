@@ -110,7 +110,7 @@ func parseKinozalDate(s string) time.Time {
 
  for word, days:= range map[string]int{"сегодня": 0, "today": 0, "вчера": -1, "yesterday": -1} {
  if strings.HasPrefix(lower, word) {
- clock:= strings.TrimSpace(s[len([]rune(word)):])
+ clock:= strings.TrimSpace(s[len(word):])
  if t, err:= time.Parse("15:04", clock); err == nil {
  d:= now.AddDate(0, 0, days)
  return time.Date(d.Year(), d.Month(), d.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
