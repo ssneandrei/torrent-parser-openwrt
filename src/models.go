@@ -7,6 +7,7 @@ import (
 
 type SearchQuery struct {
  Query string
+ TrackerID string
  Categories []int
  Limit int
  Offset int
