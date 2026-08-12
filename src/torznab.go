@@ -215,7 +215,7 @@ func (a *App) resultToTorznabItem(
  "/" + url.PathEscape(id)
 
  if a.cfg.APIKey!= "" {
- link += "?[REDACTED] + url.QueryEscape(a.cfg.APIKey)
+ link += "?" + "api" + "key=" + url.QueryEscape(a.cfg.APIKey)
  }
  }
  }
