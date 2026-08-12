@@ -1,46 +1,38 @@
-{
- "name": "Build",
- "on": {
- "push": { "branches": ["main"] },
- "pull_request": {},
- "workflow_dispatch": {}
- },
- "permissions": { "contents": "read" },
- "jobs": {
- "build-arm64": {
- "runs-on": "ubuntu-latest",
- "steps": [
- {
- "name": "Checkout",
- "uses": "actions/checkout@v4"
- },
- {
- "name": "Setup Go",
- "uses": "actions/setup-go@v5",
- "with": {
- "go-version-file": "src/go.mod",
- "cache": "false"
- }
- },
- {
- "name": "Test compile",
- "working-directory": "src",
+name: Build
+
+on:
+ push:
+ branches:
+ - main
+ pull_request:
+ workflow_dispatch:
+
+permissions:
+ contents: read
+
+jobs:
+ build-arm64:
+ runs-on: ubuntu-latest
+
+ steps:
+ - name: Checkout
+ uses: actions/checkout@v4
+
+ - name: Setup Go
+ uses: actions/setup-go@v5
+ with:
+ go-version-file: src/go.mod
+ cache: false
+
+ - name: Test compile
+ working-directory: src
  "run": "go test./..."
- },
- {
- "name": "Build linux/arm64",
+
+ - name: Build linux/arm64
  "run": "chmod +x build.sh &&./build.sh"
- },
- {
- "name": "Upload binary",
- "uses": "actions/upload-artifact@v4",
- "with": {
- "name": "torrent-parser-linux-arm64",
- "path": "rootfs/usr/bin/torrent-parser",
- "if-no-files-found": "error"
- }
- }
- ]
- }
- }
-}
+ - name: Upload binary
+ uses: actions/upload-artifact@v4
+ with:
+ name: torrent-parser-linux-arm64
+ path: rootfs/usr/bin/torrent-parser
+ if-no-files-found: error
