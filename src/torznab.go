@@ -120,10 +120,11 @@ func parseSearchQuery(r *http.Request) SearchQuery {
 
  return SearchQuery{
  Query: strings.TrimSpace(values.Get("q")),
+ TrackerID: strings.ToLower(strings.TrimSpace(values.Get("tracker"))),
  Categories: categories,
  Limit: limit,
  Offset: offset,
- }
+}
 }
 
 func (a *App) writeCaps(w http.ResponseWriter) {
