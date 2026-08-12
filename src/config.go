@@ -41,15 +41,11 @@ func loadConfig() (Config, error) {
  cfg.Listen = v
  }
 
- cfg.[REDACTED] if v:= uciGet("torrent-parser.main.timeout"); v!= "" {
- if n, err:= strconv.Atoi(v); err == nil && n > 0 {
- cfg.Timeout = time.Duration(n) * time.Second
- }
- }
+ if v:= uciGet("torrent-parser.main.listen"); v!= "" {
+ cfg.Listen = v
+}
 
- if v:= uciGet("torrent-parser.main.user_agent"); v!= "" {
- cfg.UserAgent = v
- }
+cfg.[REDACTED] v:= uciGet("torrent-parser.main.timeout"); v!= "" {
 
  cfg.Proxy = uciGet("torrent-parser.main.proxy")
 
