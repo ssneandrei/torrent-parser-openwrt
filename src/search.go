@@ -32,10 +32,12 @@ func (a *App) searchAll(query SearchQuery) ([]SearchResult, []error) {
 
  for id, adapter:= range adapters {
  tracker, ok:= a.cfg.Trackers[id]
- if!ok ||!tracker.Enabled {
+  if!ok ||!tracker.Enabled {
  continue
  }
-
+   if query.TrackerID!= "" && query.TrackerID!= id {
+ continue
+ }
  wg.Add(1)
 
  go func(adapter TrackerAdapter, tracker TrackerConfig) {
