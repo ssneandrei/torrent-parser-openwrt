@@ -26,10 +26,10 @@ jobs:
 
  - name: Test compile
  working-directory: src
- "run": "go test./..."
+ run": "go test./...
 
  - name: Build linux/arm64
- "run": "chmod +x build.sh &&./build.sh"
+ run: chmod +x build.sh &&./build.sh
  - name: Upload binary
  uses: actions/upload-artifact@v4
  with:
