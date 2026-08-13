@@ -15,6 +15,24 @@ type App struct {
  client *http.Client
  startedAt time.Time
 }
+type userAgentTransport struct {
+ base http.RoundTripper
+ userAgent string
+}
+
+func (t userAgentTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+ req:= r.Clone(r.Context())
+ req.Header = r.Header.Clone()
+
+ ua:= strings.TrimSpace(t.userAgent)
+ if ua == "" {
+ ua = defaultUA
+ }
+
+ req.Header.Set("User-Agent", ua)
+ return t.base.RoundTrip(req)
+}
+
 
 func newApp(cfg Config) (*App, error) {
  transport:= http.DefaultTransport.(*http.Transport).Clone()
@@ -34,7 +52,7 @@ func newApp(cfg Config) (*App, error) {
  }
 
  client:= &http.Client{
- Transport: transport,
+ Transport: userAgentTransport{base: transport, userAgent: cfg.UserAgent},
  Timeout: cfg.Timeout,
  }
 
